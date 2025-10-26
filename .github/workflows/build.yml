@@ -29,13 +29,13 @@ jobs:
       run: |
         mkdir -p ~/.android
         echo "count=0" > ~/.android/repositories.cfg
-        mkdir -p $HOME/.buildozer/android/platform/android-sdk/cmdline-tools/latest
-        cd $HOME/.buildozer/android/platform/android-sdk/cmdline-tools/latest
+        mkdir -p $HOME/.buildozer/android/platform/android-sdk/cmdline-tools
+        cd $HOME/.buildozer/android/platform/android-sdk/cmdline-tools
         curl -o sdk.zip https://dl.google.com/android/repository/commandlinetools-linux-10406996_latest.zip
-        unzip sdk.zip > /dev/null
+        unzip sdk.zip -d tools > /dev/null
         rm sdk.zip
-        yes | ./bin/sdkmanager --licenses || true
-        yes | ./bin/sdkmanager --sdk_root=$HOME/.buildozer/android/platform/android-sdk "platform-tools" "platforms;android-33" "build-tools;33.0.2" "ndk;25.1.8937393"
+        yes | tools/cmdline-tools/bin/sdkmanager --licenses || true
+        yes | tools/cmdline-tools/bin/sdkmanager --sdk_root=$HOME/.buildozer/android/platform/android-sdk "platform-tools" "platforms;android-33" "build-tools;33.0.2" "ndk;25.1.8937393"
 
     - name: Build APK
       run: |
@@ -46,4 +46,3 @@ jobs:
       with:
         name: flappyBrid-apk
         path: bin/*.apk
-
