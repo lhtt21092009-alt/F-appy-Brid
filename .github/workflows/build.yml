@@ -21,9 +21,15 @@ jobs:
     - name: Install dependencies
       run: |
         sudo apt update
-        sudo apt install -y zip unzip openjdk-11-jdk build-essential git
-        python -m pip install --upgrade pip
+        sudo apt install -y zip unzip openjdk-11-jdk build-essential git python3-pip
+        pip install --upgrade pip
         pip install buildozer cython
+
+    - name: Accept Android SDK licenses
+      run: |
+        mkdir -p ~/.android
+        echo "count=0" > ~/.android/repositories.cfg
+        yes | buildozer android accept_sdk_license
 
     - name: Build APK
       run: |
