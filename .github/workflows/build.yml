@@ -7,7 +7,6 @@ on:
 
 jobs:
   build:
-    # Buildozer chỉ hoạt động ổn định trên môi trường Linux
     runs-on: ubuntu-latest
 
     steps:
@@ -20,11 +19,19 @@ jobs:
           path: .buildozer
           key: ${{ runner.os }}-buildozer-${{ hashFiles('buildozer.spec') }}
 
-      - name: Setup Buildozer
+      - name: Setup Buildozer and Fix libtinfo5
         run: |
-          # Cài đặt các thư viện cần thiết cho Buildozer
+          # 1. Cài đặt các thư viện cần thiết cho Buildozer
           sudo apt update
-          sudo apt install -y git zip unzip openjdk-17-jdk python3-pip autoconf libtool pkg-config zlib1g-dev libncurses5-dev libncursesw5-dev libtinfo5 cmake libffi-dev build-essential
+          # Thay thế libtinfo5 bằng libtinfo6 và các gói khác
+          sudo apt install -y git zip unzip openjdk-17-jdk python3-pip autoconf libtool pkg-config zlib1g-dev libncurses5-dev libncursesw5-dev cmake libffi-dev build-essential 
+          
+          # 2. FIX LỖI libtinfo5 (Quan trọng cho Buildozer trên Ubuntu mới)
+          # libtinfo5 đã bị loại bỏ, dùng libtinfo6 và tạo symlink
+          sudo apt install -y libtinfo6
+          sudo ln -s /usr/lib/x86_64-linux-gnu/libtinfo.so.6 /usr/lib/x86_64-linux-gnu/libtinfo.so.5
+          
+          # 3. Cài đặt Buildozer
           pip install buildozer
 
       - name: Build APK (Debug)
