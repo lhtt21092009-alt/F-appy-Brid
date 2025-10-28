@@ -3,7 +3,7 @@ name: Build Android APK (Buildozer)
 on:
   push:
     branches:
-      - main  # Thay 'main' bằng tên branch chính của bạn nếu cần
+      - main
 
 jobs:
   build:
@@ -21,19 +21,22 @@ jobs:
 
       - name: Setup Buildozer and Fix libtinfo5
         run: |
-          # 1. Cài đặt các thư viện cần thiết cho Buildozer
+          # 1. Cài đặt các thư viện hệ thống cần thiết
           sudo apt update
-          # Thay thế libtinfo5 bằng libtinfo6 và các gói khác
           sudo apt install -y git zip unzip openjdk-17-jdk python3-pip autoconf libtool pkg-config zlib1g-dev libncurses5-dev libncursesw5-dev cmake libffi-dev build-essential 
           
-          # 2. FIX LỖI libtinfo5 (Quan trọng cho Buildozer trên Ubuntu mới)
-          # libtinfo5 đã bị loại bỏ, dùng libtinfo6 và tạo symlink
+          # 2. FIX LỖI libtinfo5
           sudo apt install -y libtinfo6
           sudo ln -s /usr/lib/x86_64-linux-gnu/libtinfo.so.6 /usr/lib/x86_64-linux-gnu/libtinfo.so.5
           
-          # 3. Cài đặt Buildozer
+          # 3. Cài đặt Buildozer và Cython
           pip install buildozer
           pip install cython
+
+      # --- BƯỚC MỚI VÀ QUAN TRỌNG: CHẤP NHẬN GIẤY PHÉP ---
+      - name: Accept Android SDK Licenses
+        run: |
+          yes | buildozer android update
 
       - name: Build APK (Debug)
         # Lệnh build chính, tạo file APK
