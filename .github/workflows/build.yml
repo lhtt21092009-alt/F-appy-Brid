@@ -21,24 +21,27 @@ jobs:
 
       - name: Setup Buildozer and Fix libtinfo5
         run: |
-          # 1. Cài đặt các thư viện hệ thống cần thiết
+          # Cài đặt thư viện hệ thống
           sudo apt update
           sudo apt install -y git zip unzip openjdk-17-jdk python3-pip autoconf libtool pkg-config zlib1g-dev libncurses5-dev libncursesw5-dev cmake libffi-dev build-essential 
           
-          # 2. FIX LỖI libtinfo5
+          # FIX LỖI libtinfo5
           sudo apt install -y libtinfo6
           sudo ln -s /usr/lib/x86_64-linux-gnu/libtinfo.so.6 /usr/lib/x86_64-linux-gnu/libtinfo.so.5
           
-          # 3. Cài đặt Buildozer và Cython
+          # Cài đặt Buildozer và Cython
           pip install buildozer
           pip install cython
 
-      # XÓA BƯỚC 'Accept Android SDK Licenses' không ổn định
-      
-      - name: Build APK (Debug) and Accept Licenses
-        # Thêm cờ '--accept-license' để tự động chấp nhận giấy phép trong quá trình build
-        run: buildozer android debug --accept-license
+      - name: Download SDK Tools and Accept Licenses (Mới)
+        # Lệnh này buộc Buildozer tải và cài đặt các công cụ cần thiết (build-tools, ndk)
+        # và chấp nhận giấy phép cho riêng bước này.
+        run: buildozer android update --accept-license
         
+      - name: Build APK (Debug)
+        # Chỉ chạy lệnh build, các công cụ đã được cài đặt ở bước trên
+        run: buildozer android debug
+
       - name: Upload APK Artifact
         uses: actions/upload-artifact@v4
         with:
