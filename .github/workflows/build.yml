@@ -1,48 +1,39 @@
-name: Build Pygame APK
+name: Build Android APK (Buildozer)
 
 on:
   push:
-    branches: [ main ]
-  workflow_dispatch:
+    branches:
+      - main  # Thay 'main' bằng tên branch chính của bạn nếu cần
 
 jobs:
   build:
+    # Buildozer chỉ hoạt động ổn định trên môi trường Linux
     runs-on: ubuntu-latest
 
     steps:
-    - name: Checkout code
-      uses: actions/checkout@v4
+      - name: Checkout Code
+        uses: actions/checkout@v4
 
-    - name: Set up Python
-      uses: actions/setup-python@v5
-      with:
-        python-version: "3.11"
+      - name: Cache Buildozer Dependencies
+        uses: actions/cache@v4
+        with:
+          path: .buildozer
+          key: ${{ runner.os }}-buildozer-${{ hashFiles('buildozer.spec') }}
 
-    - name: Install dependencies
-      run: |
-        sudo apt update
-        sudo apt install -y zip unzip openjdk-11-jdk build-essential git python3-pip
-        pip install --upgrade pip
-        pip install buildozer cython
+      - name: Setup Buildozer
+        run: |
+          # Cài đặt các thư viện cần thiết cho Buildozer
+          sudo apt update
+          sudo apt install -y git zip unzip openjdk-17-jdk python3-pip autoconf libtool pkg-config zlib1g-dev libncurses5-dev libncursesw5-dev libtinfo5 cmake libffi-dev build-essential
+          pip install buildozer
 
-    - name: Setup Android SDK manually
-      run: |
-        mkdir -p ~/.android
-        echo "count=0" > ~/.android/repositories.cfg
-        mkdir -p $HOME/.buildozer/android/platform/android-sdk/cmdline-tools
-        cd $HOME/.buildozer/android/platform/android-sdk/cmdline-tools
-        curl -o sdk.zip https://dl.google.com/android/repository/commandlinetools-linux-10406996_latest.zip
-        unzip sdk.zip -d tools > /dev/null
-        rm sdk.zip
-        yes | tools/cmdline-tools/bin/sdkmanager --licenses || true
-        yes | tools/cmdline-tools/bin/sdkmanager --sdk_root=$HOME/.buildozer/android/platform/android-sdk "platform-tools" "platforms;android-33" "build-tools;33.0.2" "ndk;25.1.8937393"
+      - name: Build APK (Debug)
+        # Lệnh build chính, tạo file APK
+        run: buildozer android debug
 
-    - name: Build APK
-      run: |
-        buildozer -v android debug
-
-    - name: Upload APK artifact
-      uses: actions/upload-artifact@v4
-      with:
-        name: flappyBrid-apk
-        path: bin/*.apk
+      - name: Upload APK Artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: fappy-brid-apk
+          path: bin/*.apk
+          retention-days: 7
