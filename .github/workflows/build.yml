@@ -1,58 +1,35 @@
-name: Build Android APK (Buildozer)
+name: Build Pygame EXE
 
 on:
   push:
-    branches:
-      - main # Hoặc tên branch chính của bạn (ví dụ: master)
+    branches: [ main ]
+  workflow_dispatch:
 
 jobs:
   build:
-    runs-on: ubuntu-latest
+    runs-on: windows-latest
 
     steps:
-      - name: Checkout Code
+      - name: Checkout repo
         uses: actions/checkout@v4
 
-      - name: Cache Buildozer Dependencies
-        # Giúp tăng tốc độ build từ lần thứ hai trở đi
-        uses: actions/cache@v4
+      - name: Set up Python
+        uses: actions/setup-python@v5
         with:
-          path: .buildozer
-          key: ${{ runner.os }}-buildozer-${{ hashFiles('buildozer.spec') }}
+          python-version: '3.12'
 
-      - name: Setup Environment and Install Tools 🛠️
+      - name: Install dependencies
         run: |
-          # 1. Cài đặt các thư viện hệ thống cần thiết
-          sudo apt update
-          sudo apt install -y git zip unzip openjdk-17-jdk python3-pip autoconf libtool pkg-config zlib1g-dev libncurses5-dev libncursesw5-dev cmake libffi-dev build-essential 
-          
-          # 2. FIX LỖI libtinfo5
-          sudo apt install -y libtinfo6
-          sudo ln -s /usr/lib/x86_64-linux-gnu/libtinfo.so.6 /usr/lib/x86_64-linux-gnu/libtinfo.so.5
-          
-          # 3. Cài đặt Buildozer và Cython
-          pip install buildozer
-          pip install cython
-      - name: Install SDK and Build APK (Two-pass Method) ✅
-        # Chạy lệnh này trong cùng một shell để giữ lại các biến môi trường
-        run: |
-          echo "--- BƯỚC 1: XÓA CACHE VÀ BẮT ĐẦU TẢI SDK/NDK ---"
-          # Xóa cache SDK/NDK để đảm bảo Buildozer tải phiên bản mới dựa trên buildozer.spec
-          rm -rf /home/runner/.buildozer/android/platform/android-sdk
-          rm -rf /home/runner/.buildozer/android/platform/android-ndk-*
-          
-          # Chạy Buildozer lần 1: Buộc tải SDK và chấp nhận giấy phép. 
-          # Lệnh này sẽ thất bại (lỗi Aidl) nhưng hoàn tất việc tải xuống.
-          buildozer android debug --accept-license || true
-          
-          echo "--- BƯỚC 2: BUILD LẠI (THÀNH CÔNG) ---"
-          # Chạy Buildozer lần 2: Công cụ đã có, Buildozer thiết lập PATH và hoàn tất quá trình build.
-          buildozer android debug
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+          pip install pyinstaller
 
-      - name: Upload APK Artifact
+      - name: Build EXE
+        run: |
+          pyinstaller --onefile --noconsole --icon=game.ico --add-data "assets;assets" main.py
+
+      - name: Upload EXE artifact
         uses: actions/upload-artifact@v4
-# ... (Phần còn lại của file giữ nguyên)
         with:
-          name: fappy-brid-apk
-          path: bin/*.apk
-          retention-days: 7
+          name: pygame-exe
+          path: dist/main.exe
