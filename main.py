@@ -36,7 +36,7 @@ JUMP_SOUND_FILE = "assets/sounds/jump.wav"
 SCORE_SOUND_FILE = "assets/sounds/score.wav"
 
 # --- ĐƯỜNG DẪN HÌNH ẢNH ---
-BIRD_IMAGE_FILE = "assets/image/pixel_art.png" 
+BIRD_IMAGE_FILE = "image1.png" 
 BG_IMAGE_FILE = "assets/image/bg.png" 
 SPEAKER_ON_FILE = "assets/image/speaker_on.png"
 SPEAKER_OFF_FILE = "assets/image/speaker_off.png"
