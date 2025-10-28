@@ -33,15 +33,12 @@ jobs:
           pip install buildozer
           pip install cython
 
-      # --- BƯỚC MỚI VÀ QUAN TRỌNG: CHẤP NHẬN GIẤY PHÉP ---
-      - name: Accept Android SDK Licenses
-        run: |
-          yes | buildozer android update
-
-      - name: Build APK (Debug)
-        # Lệnh build chính, tạo file APK
-        run: buildozer android debug
-
+      # XÓA BƯỚC 'Accept Android SDK Licenses' không ổn định
+      
+      - name: Build APK (Debug) and Accept Licenses
+        # Thêm cờ '--accept-license' để tự động chấp nhận giấy phép trong quá trình build
+        run: buildozer android debug --accept-license
+        
       - name: Upload APK Artifact
         uses: actions/upload-artifact@v4
         with:
