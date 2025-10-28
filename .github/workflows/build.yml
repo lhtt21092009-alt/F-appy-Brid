@@ -34,22 +34,24 @@ jobs:
           pip install buildozer
           pip install cython
       - name: Install SDK and Build APK (Two-pass Method) ✅
+        # Chạy lệnh này trong cùng một shell để giữ lại các biến môi trường
         run: |
           echo "--- BƯỚC 1: XÓA CACHE VÀ BẮT ĐẦU TẢI SDK/NDK ---"
-          # Xóa cache SDK/NDK để đảm bảo Buildozer tải phiên bản mới
+          # Xóa cache SDK/NDK để đảm bảo Buildozer tải phiên bản mới dựa trên buildozer.spec
           rm -rf /home/runner/.buildozer/android/platform/android-sdk
           rm -rf /home/runner/.buildozer/android/platform/android-ndk-*
           
-          # Chạy Buildozer lần 1: Buộc tải SDK và chấp nhận giấy phép.
-          # Lệnh này sẽ thất bại khi tìm Aidl lần đầu, NHƯNG hoàn tất tải xuống.
+          # Chạy Buildozer lần 1: Buộc tải SDK và chấp nhận giấy phép. 
+          # Lệnh này sẽ thất bại (lỗi Aidl) nhưng hoàn tất việc tải xuống.
           buildozer android debug --accept-license || true
           
           echo "--- BƯỚC 2: BUILD LẠI (THÀNH CÔNG) ---"
-          # Chạy Buildozer lần 2: Công cụ đã có, PATH được thiết lập lại, quá trình build sẽ hoàn tất.
+          # Chạy Buildozer lần 2: Công cụ đã có, Buildozer thiết lập PATH và hoàn tất quá trình build.
           buildozer android debug
 
       - name: Upload APK Artifact
         uses: actions/upload-artifact@v4
+# ... (Phần còn lại của file giữ nguyên)
         with:
           name: fappy-brid-apk
           path: bin/*.apk
