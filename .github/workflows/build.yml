@@ -21,6 +21,9 @@ jobs:
 
       - name: Setup Buildozer and Fix libtinfo5
         run: |
+          # Xóa thư mục Android SDK đã cached để buộc Buildozer tải lại
+          rm -rf /home/runner/.buildozer/android/platform/android-sdk
+          rm -rf /home/runner/.buildozer/android/platform/android-ndk-*
           # Cài đặt thư viện hệ thống
           sudo apt update
           sudo apt install -y git zip unzip openjdk-17-jdk python3-pip autoconf libtool pkg-config zlib1g-dev libncurses5-dev libncursesw5-dev cmake libffi-dev build-essential 
