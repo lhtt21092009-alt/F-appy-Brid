@@ -33,6 +33,7 @@ jobs:
           
           # 3. Cài đặt Buildozer
           pip install buildozer
+          pip install cython
 
       - name: Build APK (Debug)
         # Lệnh build chính, tạo file APK
