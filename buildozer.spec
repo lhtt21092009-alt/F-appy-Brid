@@ -16,5 +16,7 @@ warn_on_root = 1
 [app:android]
 android.minapi = 21   ; Hỗ trợ từ Android 5.0 trở lên
 android.api = 33     ; API mục tiêu mới nhất
+android.ndk =  25b
+android.sdk_tools_version = 34.0.0
 android.archs = armeabi-v7a, arm64-v8a
 # android.split_archs = True
