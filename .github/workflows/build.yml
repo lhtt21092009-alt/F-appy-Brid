@@ -3,7 +3,7 @@ name: Build Android APK (Buildozer)
 on:
   push:
     branches:
-      - main
+      - main # Hoặc tên branch chính của bạn (ví dụ: master)
 
 jobs:
   build:
@@ -14,36 +14,40 @@ jobs:
         uses: actions/checkout@v4
 
       - name: Cache Buildozer Dependencies
+        # Giúp tăng tốc độ build từ lần thứ hai trở đi
         uses: actions/cache@v4
         with:
           path: .buildozer
           key: ${{ runner.os }}-buildozer-${{ hashFiles('buildozer.spec') }}
 
-      - name: Setup Buildozer and Fix libtinfo5
+      - name: Setup Environment and Install Tools 🛠️
         run: |
-          # Xóa thư mục Android SDK đã cached để buộc Buildozer tải lại
-          rm -rf /home/runner/.buildozer/android/platform/android-sdk
-          rm -rf /home/runner/.buildozer/android/platform/android-ndk-*
-          # Cài đặt thư viện hệ thống
+          # 1. Cài đặt các thư viện hệ thống cần thiết
           sudo apt update
           sudo apt install -y git zip unzip openjdk-17-jdk python3-pip autoconf libtool pkg-config zlib1g-dev libncurses5-dev libncursesw5-dev cmake libffi-dev build-essential 
           
-          # FIX LỖI libtinfo5
+          # 2. FIX LỖI libtinfo5
           sudo apt install -y libtinfo6
           sudo ln -s /usr/lib/x86_64-linux-gnu/libtinfo.so.6 /usr/lib/x86_64-linux-gnu/libtinfo.so.5
           
-          # Cài đặt Buildozer và Cython
+          # 3. Cài đặt Buildozer và Cython
           pip install buildozer
           pip install cython
 
-      - name: Download SDK Tools and Accept Licenses (Mới)
-        # Lệnh này buộc Buildozer tải và cài đặt các công cụ cần thiết (build-tools, ndk)
-        # và chấp nhận giấy phép cho riêng bước này.
-        run: buildozer android update --accept-license
-        
-      - name: Build APK (Debug)
-        # Chỉ chạy lệnh build, các công cụ đã được cài đặt ở bước trên
-        run: buildozer android debug
+      - name: Install SDK and Build APK (Combined Step) ⚙️
+        # Chạy lệnh này trong cùng một shell để giữ lại các biến môi trường SDK/Ant
+        run: |
+          echo "--- BƯỚC 1: CÀI ĐẶT CÔNG CỤ SDK VÀ CHẤP NHẬN GIẤY PHÉP ---"
+          # Xóa cache SDK/NDK để đảm bảo Buildozer tải phiên bản mới dựa trên buildozer.spec
+          rm -rf /home/runner/.buildozer/android/platform/android-sdk
+          rm -rf /home/runner/.buildozer/android/platform/android-ndk-*
+          
+          # Lệnh tải và cấu hình SDK/NDK/Build-Tools (AIDL)
+          buildozer android update --accept-license
+          
+          echo "--- BƯỚC 2: TIẾN HÀNH BUILD APK ---"
+          # Lệnh build chính
+          buildozer android debug
 
       - name: Upload APK Artifact
         uses: actions/upload-artifact@v4
